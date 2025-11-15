@@ -10,8 +10,8 @@ interface MapViewProps {
 export function MapView({ pickupLocation, dropoffLocation, highContrast }: MapViewProps) {
   return (
     <div
-      className={`relative h-64 rounded-lg overflow-hidden ${
-        highContrast ? 'bg-gray-900 border-2 border-green-400' : 'bg-gray-100 border border-gray-300'
+      className={`relative h-full w-full ${
+        highContrast ? 'bg-gray-900' : 'bg-gray-100'
       }`}
       role="img"
       aria-label="Map showing pickup and drop-off locations"

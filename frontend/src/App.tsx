@@ -6,10 +6,11 @@ import { ShopsScreen } from './components/ShopsScreen';
 import { AccessibilitySettings } from './components/AccessibilitySettings';
 import { VoiceControl } from './components/VoiceControl';
 import { LiveTracking } from './components/LiveTracking';
+import { RideFinding } from './components/RideFinding';
 import { Settings } from 'lucide-react';
 import { Button } from './components/ui/button';
 
-export type Screen = 'home' | 'ride' | 'delivery' | 'shops' | 'tracking';
+export type Screen = 'home' | 'ride' | 'delivery' | 'finding' | 'shops' | 'tracking';
 
 export interface Location {
   address: string;
@@ -50,6 +51,25 @@ export default function App() {
   const handleServiceSelect = (service: 'ride' | 'delivery' | 'shops') => {
     setCurrentScreen(service);
   };
+
+const [selectedRide, setSelectedRide] = useState<string | null>(null);
+const [selectedFare, setSelectedFare] = useState<number | null>(null);
+
+const handleStartFinding = (params: {
+  rideType: string;
+  customFare: number;
+  pickupLocation: Location | null;
+  dropoffLocation: Location | null;
+}) => {
+  const { rideType, customFare, pickupLocation, dropoffLocation } = params;
+
+  setSelectedRide(rideType);
+  setSelectedFare(customFare);
+  setPickupLocation(pickupLocation);
+  setDropoffLocation(dropoffLocation);
+  setCurrentScreen("finding");
+};
+
 
   const handleBack = () => {
     setCurrentScreen('home');
@@ -122,10 +142,31 @@ export default function App() {
             pickupLocation={pickupLocation}
             dropoffLocation={dropoffLocation}
             onBack={handleBack}
+            onStartFinding={handleStartFinding}  
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}
           />
         )}
+
+         {currentScreen === 'finding' && (() => {
+        const temp = (window as any).__tempRide || { rideType: 'bike', customFare: 50, pickupLocation: null, dropoffLocation: null };
+        return (
+          <RideFinding
+            rideType={temp.rideType}
+            customFare={temp.customFare}
+            pickupLocation={temp.pickupLocation}
+            dropoffLocation={temp.dropoffLocation}
+            onBack={() => setCurrentScreen('ride')}
+            onBidAccepted={(booking) => {
+              // set booking and navigate to live tracking
+              setBookingDetails({ ...booking, type: 'ride', vehicleType: booking.vehicle });
+              setCurrentScreen('tracking');
+            }}
+            highContrast={settings.highContrast}
+            voiceEnabled={settings.voiceEnabled}
+          />
+        );
+      })()}
 
         {currentScreen === 'delivery' && (
           <DeliveryScreen
@@ -153,6 +194,7 @@ export default function App() {
             voiceEnabled={settings.voiceEnabled}
           />
         )}
+
       </main>
     </div>
   );

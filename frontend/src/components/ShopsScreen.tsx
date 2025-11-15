@@ -172,9 +172,9 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
 
   if (selectedShop) {
     return (
-      <div className="p-4 space-y-4">
+      <div className="h-[calc(100vh-80px)] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center gap-3">
+        <div className={`flex items-center gap-3 p-4 ${highContrast ? 'bg-black border-b-2 border-green-400' : 'bg-white border-b border-gray-200'}`}>
           <Button
             variant="ghost"
             size="icon"
@@ -188,15 +188,15 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
             <ArrowLeft className="h-6 w-6" />
           </Button>
           <div>
-            <h2 className="text-xl">{selectedShop.name}</h2>
-            <p className="text-sm opacity-70">
+            <h2 className="text-lg">{selectedShop.name}</h2>
+            <p className="text-xs opacity-70">
               {selectedShop.distance} • ₹{selectedShop.deliveryFee} delivery
             </p>
           </div>
         </div>
 
-        {/* Products */}
-        <div className="space-y-3">
+        {/* Scrollable Products */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {selectedShop.products?.map((product) => (
             <Card
               key={product.id}

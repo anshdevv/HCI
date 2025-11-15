@@ -76,121 +76,117 @@ export function HomeScreen({
   };
 
   return (
-    <div className="p-4 space-y-4">
-      {/* Map View */}
-      <MapView
-        pickupLocation={pickupLocation}
-        dropoffLocation={dropoffLocation}
-        highContrast={highContrast}
-      />
+    <div className="h-[calc(100vh-80px)] flex flex-col">
+      {/* Map View with Overlaying Location Inputs */}
+      <div className="relative flex-1">
+        <MapView
+          pickupLocation={pickupLocation}
+          dropoffLocation={dropoffLocation}
+          highContrast={highContrast}
+        />
 
-      {/* Location Inputs */}
-      <div className="space-y-3">
-        <div className="relative">
-          <MapPin className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-6 w-6 ${highContrast ? 'text-green-400' : 'text-green-600'}`} />
-          <Input
-            type="text"
-            placeholder="Enter pickup location"
-            value={pickupLocation?.address || ''}
-            onChange={handlePickupChange}
-            onFocus={() => speak('Enter pickup location')}
-            className={`pl-12 h-14 ${highContrast ? 'bg-gray-900 border-green-400 text-white placeholder:text-gray-400' : 'border-gray-300'}`}
-            aria-label="Pickup location"
-          />
-          {showRecentPickup && (
-            <div className="absolute left-0 top-full w-full bg-white shadow-lg z-10">
-              {recentLocations.map((location) => (
-                <div
-                  key={location.address}
-                  className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleRecentLocationSelect(location, 'pickup')}
-                >
-                  {location.address}
-                </div>
-              ))}
-            </div>
-          )}
-          <Clock
-            className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 ${highContrast ? 'text-green-400' : 'text-green-600'}`}
-            onClick={() => setShowRecentPickup(!showRecentPickup)}
-          />
-        </div>
+        {/* Overlaying Location Inputs */}
+        <div className="absolute top-4 left-4 right-4 space-y-2">
+          <div className="relative">
+            <MapPin className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 z-10 ${highContrast ? 'text-green-400' : 'text-green-600'}`} />
+            <Input
+              type="text"
+              placeholder="Pickup"
+              value={pickupLocation?.address || ''}
+              onChange={handlePickupChange}
+              onFocus={() => speak('Enter pickup location')}
+              className={`pl-10 pr-10 h-12 shadow-lg ${highContrast ? 'bg-gray-900 border-green-400 text-white placeholder:text-gray-400' : 'bg-white border-gray-300'}`}
+              aria-label="Pickup location"
+            />
+            <Clock
+              className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 cursor-pointer ${highContrast ? 'text-green-400' : 'text-green-600'}`}
+              onClick={() => setShowRecentPickup(!showRecentPickup)}
+            />
+            {showRecentPickup && (
+              <div className={`absolute left-0 top-full mt-1 w-full shadow-lg rounded-lg overflow-hidden z-20 ${highContrast ? 'bg-gray-900 border border-green-400' : 'bg-white'}`}>
+                {recentLocations.map((location) => (
+                  <div
+                    key={location.address}
+                    className={`px-4 py-3 cursor-pointer ${highContrast ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+                    onClick={() => handleRecentLocationSelect(location, 'pickup')}
+                  >
+                    <p className="text-sm truncate">{location.address}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-        <div className="relative">
-          <MapPin className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-6 w-6 ${highContrast ? 'text-green-400' : 'text-green-600'}`} />
-          <Input
-            type="text"
-            placeholder="Enter drop-off location"
-            value={dropoffLocation?.address || ''}
-            onChange={handleDropoffChange}
-            onFocus={() => speak('Enter drop-off location')}
-            className={`pl-12 h-14 ${highContrast ? 'bg-gray-900 border-green-400 text-white placeholder:text-gray-400' : 'border-gray-300'}`}
-            aria-label="Drop-off location"
-          />
-          {showRecentDropoff && (
-            <div className="absolute left-0 top-full w-full bg-white shadow-lg z-10">
-              {recentLocations.map((location) => (
-                <div
-                  key={location.address}
-                  className="px-4 py-2 cursor-pointer hover:bg-gray-100"
-                  onClick={() => handleRecentLocationSelect(location, 'dropoff')}
-                >
-                  {location.address}
-                </div>
-              ))}
-            </div>
-          )}
-          <Clock
-            className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-6 w-6 ${highContrast ? 'text-green-400' : 'text-green-600'}`}
-            onClick={() => setShowRecentDropoff(!showRecentDropoff)}
-          />
+          <div className="relative">
+            <MapPin className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 z-10 ${highContrast ? 'text-green-400' : 'text-green-600'}`} />
+            <Input
+              type="text"
+              placeholder="Drop-off"
+              value={dropoffLocation?.address || ''}
+              onChange={handleDropoffChange}
+              onFocus={() => speak('Enter drop-off location')}
+              className={`pl-10 pr-10 h-12 shadow-lg ${highContrast ? 'bg-gray-900 border-green-400 text-white placeholder:text-gray-400' : 'bg-white border-gray-300'}`}
+              aria-label="Drop-off location"
+            />
+            <Clock
+              className={`absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 cursor-pointer ${highContrast ? 'text-green-400' : 'text-green-600'}`}
+              onClick={() => setShowRecentDropoff(!showRecentDropoff)}
+            />
+            {showRecentDropoff && (
+              <div className={`absolute left-0 top-full mt-1 w-full shadow-lg rounded-lg overflow-hidden z-20 ${highContrast ? 'bg-gray-900 border border-green-400' : 'bg-white'}`}>
+                {recentLocations.map((location) => (
+                  <div
+                    key={location.address}
+                    className={`px-4 py-3 cursor-pointer ${highContrast ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+                    onClick={() => handleRecentLocationSelect(location, 'dropoff')}
+                  >
+                    <p className="text-sm truncate">{location.address}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Service Options */}
-      <div className="space-y-3">
-        <h2 className={`text-xl ${highContrast ? 'text-white' : 'text-gray-900'}`}>
+      {/* Service Options - Inline Square Cards */}
+      <div className={`p-4 ${highContrast ? 'bg-black border-t-2 border-green-400' : 'bg-white border-t border-gray-200'} shadow-lg`}>
+        <h2 className={`text-base mb-3 ${highContrast ? 'text-white' : 'text-gray-900'}`}>
           Choose Service
         </h2>
 
-        <div className="grid grid-cols-1 gap-3">
-          <Button
+        <div className="grid grid-cols-3 gap-3">
+          <button
             onClick={() => handleServiceClick('ride', 'Ride')}
             disabled={!pickupLocation || !dropoffLocation}
-            className={`h-20 flex items-center justify-start gap-4 ${
+            className={`aspect-square rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${
               highContrast
-                ? 'bg-green-900 hover:bg-green-800 text-white border-2 border-green-400'
-                : 'bg-green-600 hover:bg-green-700 text-white'
+                ? 'bg-green-900 hover:bg-green-800 text-white border-2 border-green-400 disabled:opacity-50'
+                : 'bg-green-600 hover:bg-green-700 text-white disabled:opacity-50'
             }`}
             aria-label="Book a ride"
           >
             <Bike className="h-8 w-8" />
-            <div className="text-left">
-              <div className="text-lg">Book a Ride</div>
-              <div className="text-sm opacity-90">Travel to your destination</div>
-            </div>
-          </Button>
+            <span className="text-sm">Ride</span>
+          </button>
 
-          <Button
+          <button
             onClick={() => handleServiceClick('delivery', 'Delivery')}
             disabled={!pickupLocation || !dropoffLocation}
-            className={`h-20 flex items-center justify-start gap-4 ${
+            className={`aspect-square rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${
               highContrast
-                ? 'bg-green-900 hover:bg-green-800 text-white border-2 border-green-400'
-                : 'bg-green-600 hover:bg-green-700 text-white'
+                ? 'bg-green-900 hover:bg-green-800 text-white border-2 border-green-400 disabled:opacity-50'
+                : 'bg-green-600 hover:bg-green-700 text-white disabled:opacity-50'
             }`}
             aria-label="Send a parcel"
           >
             <Package className="h-8 w-8" />
-            <div className="text-left">
-              <div className="text-lg">Send Parcel</div>
-              <div className="text-sm opacity-90">Deliver packages & items</div>
-            </div>
-          </Button>
+            <span className="text-sm">Parcel</span>
+          </button>
 
-          <Button
+          <button
             onClick={() => handleServiceClick('shops', 'Shops')}
-            className={`h-20 flex items-center justify-start gap-4 ${
+            className={`aspect-square rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${
               highContrast
                 ? 'bg-green-900 hover:bg-green-800 text-white border-2 border-green-400'
                 : 'bg-green-600 hover:bg-green-700 text-white'
@@ -198,23 +194,20 @@ export function HomeScreen({
             aria-label="Browse shops"
           >
             <ShoppingBag className="h-8 w-8" />
-            <div className="text-left">
-              <div className="text-lg">Shops</div>
-              <div className="text-sm opacity-90">Order from nearby stores</div>
-            </div>
-          </Button>
+            <span className="text-sm">Shops</span>
+          </button>
         </div>
-      </div>
 
-      {/* Voice Hint */}
-      {voiceEnabled && (
-        <div className={`flex items-center gap-2 p-3 rounded-lg ${
-          highContrast ? 'bg-green-900 text-white' : 'bg-green-50 text-green-800'
-        }`}>
-          <Volume2 className="h-5 w-5" />
-          <p className="text-sm">Voice guidance is active</p>
-        </div>
-      )}
+        {/* Voice Hint - Compact */}
+        {voiceEnabled && (
+          <div className={`flex items-center gap-2 p-2 rounded-lg mt-3 ${
+            highContrast ? 'bg-green-900 text-white' : 'bg-green-50 text-green-800'
+          }`}>
+            <Volume2 className="h-4 w-4" />
+            <p className="text-xs">Voice active</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
