@@ -21,6 +21,7 @@ export interface Location {
 export interface AppSettings {
   highContrast: boolean;
   voiceEnabled: boolean;
+  colorBlind:boolean
 }
 
 export interface BookingDetails {
@@ -39,6 +40,7 @@ export default function App() {
   const [settings, setSettings] = useState<AppSettings>({
     highContrast: false,
     voiceEnabled: false,
+    colorBlind:false
   });
   const [showSettings, setShowSettings] = useState(false);
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(null);
@@ -89,21 +91,42 @@ const handleStartFinding = (params: {
   };
 
   return (
-    <div className={`min-h-screen ${settings.highContrast ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
-      {/* Header */}
-      <header className={`${settings.highContrast ? 'bg-green-900 border-green-700' : 'bg-green-600'} text-white p-4 shadow-md`}>
-        <div className="max-w-md mx-auto flex items-center justify-between">
-          <h1 className="text-2xl">RideAccess</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowSettings(!showSettings)}
-            className="text-white hover:bg-green-700"
-          >
-            <Settings className="h-6 w-6" />
-          </Button>
-        </div>
-      </header>
+    <div
+  className={`min-h-screen ${
+    settings.highContrast
+      ? 'bg-black text-white'
+      : 'bg-white text-gray-900'
+  }`}
+>
+
+{/* Header */}
+<header
+  className={`${
+    settings.highContrast
+      ? settings.colorBlind
+        ? 'bg-blue border-blue'
+        : 'bg-green-900 border-green-700'
+      : settings.colorBlind
+      ? 'bg-blue'
+      : 'bg-green-600'
+  } text-white p-4 shadow-md`}
+>
+  <div className="max-w-md mx-auto flex items-center justify-between">
+    <h1 className="text-2xl">RideAccess</h1>
+
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setShowSettings(!showSettings)}
+      className={`text-white ${
+        settings.colorBlind ? 'hover:bg-blue-700' : 'hover:bg-green-700'
+      }`}
+    >
+      <Settings className="h-6 w-6" />
+    </Button>
+  </div>
+</header>
+
 
       {/* Settings Panel */}
       {showSettings && (
@@ -134,6 +157,7 @@ const handleStartFinding = (params: {
             onServiceSelect={handleServiceSelect}
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}
+            colorBlind={settings.colorBlind}
           />
         )}
 
@@ -145,6 +169,7 @@ const handleStartFinding = (params: {
             onStartFinding={handleStartFinding}  
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}
+            colorBlind={settings.colorBlind}
           />
         )}
 
@@ -164,6 +189,7 @@ const handleStartFinding = (params: {
             }}
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}
+            
           />
         );
       })()}
