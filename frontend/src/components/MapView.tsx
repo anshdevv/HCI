@@ -1,7 +1,7 @@
 import { MapPin } from 'lucide-react';
 import { Location } from '../App';
 // 1. Import the image so the bundler can find it
-import mapBg from '../imgs/map2'; 
+// import {mapBg} from './imgs/map2.png'
 
 interface MapViewProps {
   pickupLocation: Location | null;
@@ -22,7 +22,7 @@ export function MapView({ pickupLocation, dropoffLocation, highContrast }: MapVi
       <div className={`absolute inset-0 ${highContrast ? 'opacity-20' : 'opacity-30'}`}>
          {/* 2. Use the imported variable here */}
          <img 
-           src={mapBg} 
+           src="./imgs/map2.png"
            alt="Map Background" 
            className="h-full w-full object-cover" 
          />
