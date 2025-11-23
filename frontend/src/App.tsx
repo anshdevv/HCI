@@ -101,17 +101,17 @@ const handleStartFinding = (params: {
 
 {/* Header */}
 <header
-  className={`${
-    settings.highContrast
-      ? settings.colorBlind
-        ? 'bg-blue border-blue'
-        : 'bg-green-900 border-green-700'
-      : settings.colorBlind
-      ? 'bg-blue'
-      : 'bg-green-600'
-  } text-white p-4 shadow-md`}
+  // className={`${
+  //   settings.highContrast
+  //     ? settings.colorBlind
+  //       ? 'bg-blue border-blue'
+  //       : 'bg-green-900 border-green-700'
+  //     : settings.colorBlind
+  //     ? 'bg-blue'
+  //     : 'bg-green-600'
+  // } text-white p-4 shadow-md`}
 >
-  <div className="max-w-md mx-auto flex items-center justify-between">
+  {/* <div className="max-w-md mx-auto flex items-center justify-between">
     <h1 className="text-2xl">RideAccess</h1>
 
     <Button
@@ -124,7 +124,7 @@ const handleStartFinding = (params: {
     >
       <Settings className="h-6 w-6" />
     </Button>
-  </div>
+  </div> */}
 </header>
 
 

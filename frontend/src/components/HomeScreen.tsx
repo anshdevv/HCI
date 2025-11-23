@@ -224,7 +224,9 @@ export function HomeScreen({
     highContrast
       ? `bg-black border-t-2 border-green-400`
       : 'bg-white border-t border-gray-200'
-  } shadow-lg`}
+  } shadow-lg
+  relative
+  ` }
 >
   <h2 className={`text-base mb-3 ${highContrast ? 'text-white' : 'text-gray-900'}`}>
     Choose Service

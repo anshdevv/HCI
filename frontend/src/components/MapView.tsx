@@ -1,5 +1,7 @@
 import { MapPin } from 'lucide-react';
 import { Location } from '../App';
+// 1. Import the image so the bundler can find it
+import mapBg from '../imgs/map2'; 
 
 interface MapViewProps {
   pickupLocation: Location | null;
@@ -16,21 +18,14 @@ export function MapView({ pickupLocation, dropoffLocation, highContrast }: MapVi
       role="img"
       aria-label="Map showing pickup and drop-off locations"
     >
-      {/* Map Background - Using a grid pattern to simulate a map */}
+      {/* Map Background */}
       <div className={`absolute inset-0 ${highContrast ? 'opacity-20' : 'opacity-30'}`}>
-        <svg width="100%" height="100%">
-          <defs>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path
-                d="M 40 0 L 0 0 0 40"
-                fill="none"
-                stroke={highContrast ? '#22c55e' : '#9ca3af'}
-                strokeWidth="1"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
+         {/* 2. Use the imported variable here */}
+         <img 
+           src={mapBg} 
+           alt="Map Background" 
+           className="h-full w-full object-cover" 
+         />
       </div>
 
       {/* Map Label */}
