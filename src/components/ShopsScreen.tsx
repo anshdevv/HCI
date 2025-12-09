@@ -4,11 +4,13 @@ import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
+import { getButtonClass, getColorClasses, getHintBgClass, getIconBgClass, getIconTextClass, getBorderClass } from '../utils/colorScheme';
 
 interface ShopsScreenProps {
   onBack: () => void;
   highContrast: boolean;
   voiceEnabled: boolean;
+  colorScheme?: 'green' | 'blue' | 'purple';
 }
 
 interface Shop {
@@ -29,10 +31,17 @@ interface Product {
   inStock: boolean;
 }
 
-export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenProps) {
+export function ShopsScreen({ onBack, highContrast, voiceEnabled, colorScheme = 'green' }: ShopsScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedShop, setSelectedShop] = useState<Shop | null>(null);
   const [cart, setCart] = useState<{ [key: string]: number }>({});
+
+  const colors = getColorClasses(colorScheme, highContrast);
+  const iconText = getIconTextClass(colorScheme, highContrast);
+  const iconBg = getIconBgClass(colorScheme, highContrast);
+  const btnClass = getButtonClass(colorScheme, highContrast);
+  const borderClass = getBorderClass(colorScheme, highContrast);
+  const hintClass = getHintBgClass(colorScheme, highContrast);
 
   const shops: Shop[] = [
     {
@@ -174,7 +183,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
     return (
       <div className="h-[calc(100vh-80px)] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className={`flex items-center gap-3 p-4 ${highContrast ? 'bg-black border-b-2 border-green-400' : 'bg-white border-b border-gray-200'}`}>
+        <div className={`flex items-center gap-3 p-4 ${highContrast ? `bg-black border-b-2 ${borderClass}` : 'bg-white border-b border-gray-200'}`}>
           <Button
             variant="ghost"
             size="icon"
@@ -182,7 +191,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
               setSelectedShop(null);
               speak('Returning to shops list');
             }}
-            className={highContrast ? 'text-green-400 hover:bg-gray-800' : 'text-gray-700'}
+            className={highContrast ? `${iconText} hover:bg-gray-800` : 'text-gray-700'}
             aria-label="Go back to shops"
           >
             <ArrowLeft className="h-6 w-6" />
@@ -201,7 +210,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
             <Card
               key={product.id}
               className={`p-4 ${
-                highContrast ? 'bg-gray-900 border-green-400' : ''
+                highContrast ? `${colors.bgDark} ${borderClass}` : ''
               } ${!product.inStock ? 'opacity-50' : ''}`}
             >
               <div className="flex items-center justify-between">
@@ -230,11 +239,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
                         <Button
                           size="sm"
                           onClick={() => addToCart(product.id)}
-                          className={
-                            highContrast
-                              ? 'bg-green-900 border border-green-400'
-                              : 'bg-green-600'
-                          }
+                          className={`${btnClass} text-white`}
                         >
                           +
                         </Button>
@@ -243,9 +248,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
                       <Button
                         size="sm"
                         onClick={() => addToCart(product.id)}
-                        className={
-                          highContrast ? 'bg-green-900 border border-green-400' : 'bg-green-600'
-                        }
+                        className={`${btnClass} text-white`}
                       >
                         Add
                       </Button>
@@ -261,7 +264,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
         {getTotalItems() > 0 && (
           <Card
             className={`p-4 ${
-              highContrast ? 'bg-green-900 border-green-400' : 'bg-green-50'
+              highContrast ? `${colors.primary} ${borderClass} text-white` : colors.primaryLight
             }`}
           >
             <div className="space-y-2">
@@ -281,11 +284,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
 
             <Button
               onClick={handleCheckout}
-              className={`w-full mt-4 h-14 ${
-                highContrast
-                  ? 'bg-green-900 hover:bg-green-800 text-white border-2 border-green-400'
-                  : 'bg-green-600 hover:bg-green-700 text-white'
-              }`}
+              className={`w-full mt-4 h-14 ${btnClass} text-white`}
             >
               Place Order
             </Button>
@@ -303,7 +302,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className={highContrast ? 'text-green-400 hover:bg-gray-800' : 'text-gray-700'}
+          className={highContrast ? `${iconText} hover:bg-gray-800` : 'text-gray-700'}
           aria-label="Go back"
         >
           <ArrowLeft className="h-6 w-6" />
@@ -315,7 +314,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
       <div className="relative">
         <Search
           className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${
-            highContrast ? 'text-green-400' : 'text-gray-500'
+            highContrast ? iconText : 'text-gray-500'
           }`}
         />
         <Input
@@ -325,19 +324,19 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
           onChange={(e) => setSearchQuery(e.target.value)}
           onFocus={() => speak('Search shops')}
           className={`pl-10 h-12 ${
-            highContrast ? 'bg-gray-900 border-green-400 text-white' : ''
+            highContrast ? `bg-gray-900 ${borderClass} text-white` : ''
           }`}
         />
       </div>
 
       {/* Info Card */}
-      <Card className={`p-4 ${highContrast ? 'bg-gray-900 border-green-400' : 'bg-green-50'}`}>
+      <Card className={`p-4 ${highContrast ? `${colors.bgDark} ${borderClass}` : colors.primaryLight}`}>
         <div className="flex items-start gap-3">
           <ShoppingCart
-            className={`h-6 w-6 ${highContrast ? 'text-green-400' : 'text-green-600'}`}
+            className={`h-6 w-6 ${iconText}`}
           />
           <div>
-            <p className={highContrast ? 'text-white' : 'text-green-800'}>
+            <p className={highContrast ? 'text-white' : colors.textLight}>
               Order from nearby stores and get items delivered to your doorstep
             </p>
           </div>
@@ -350,7 +349,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
           <Card
             key={shop.id}
             className={`p-4 cursor-pointer transition-all ${
-              highContrast ? 'bg-gray-900 border-green-400 hover:bg-gray-800' : 'hover:bg-gray-50'
+              highContrast ? `${colors.bgDark} ${borderClass} hover:bg-gray-800` : 'hover:bg-gray-50'
             }`}
             onClick={() => handleShopClick(shop)}
             role="button"
@@ -364,11 +363,9 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
           >
             <div className="flex items-start gap-4">
               <div
-                className={`p-3 rounded-lg ${
-                  highContrast ? 'bg-green-900' : 'bg-green-100'
-                }`}
+                className={`p-3 rounded-lg ${iconBg}`}
               >
-                <div className={highContrast ? 'text-green-400' : 'text-green-600'}>
+                <div className={iconText}>
                   {getCategoryIcon(shop.category)}
                 </div>
               </div>
@@ -391,7 +388,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
               <Button
                 variant="ghost"
                 size="sm"
-                className={highContrast ? 'text-green-400' : 'text-green-600'}
+                className={highContrast ? iconText : colors.text}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleShopClick(shop);
@@ -407,9 +404,7 @@ export function ShopsScreen({ onBack, highContrast, voiceEnabled }: ShopsScreenP
       {/* Voice Hint */}
       {voiceEnabled && (
         <div
-          className={`flex items-center gap-2 p-3 rounded-lg ${
-            highContrast ? 'bg-green-900 text-white' : 'bg-green-50 text-green-800'
-          }`}
+          className={`flex items-center gap-2 p-3 rounded-lg ${hintClass}`}
         >
           <Volume2 className="h-5 w-5" />
           <p className="text-sm">Tap on a shop to hear details</p>

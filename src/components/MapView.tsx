@@ -1,16 +1,33 @@
 import { MapPin } from 'lucide-react';
 import { Location } from '../App';
 import { getTranslation } from '../translations';
+import { getColorClasses, getIconTextClass, getBorderClass } from '../utils/colorScheme';
 
 interface MapViewProps {
   pickupLocation: Location | null;
   dropoffLocation: Location | null;
   highContrast: boolean;
   language?: 'en' | 'ur';
+  colorScheme?: 'green' | 'blue' | 'purple';
 }
 
-export function MapView({ pickupLocation, dropoffLocation, highContrast, language = 'en' }: MapViewProps) {
+export function MapView({
+  pickupLocation,
+  dropoffLocation,
+  highContrast,
+  language = 'en',
+  colorScheme = 'green',
+}: MapViewProps) {
   const t = (key: any) => getTranslation(key, language);
+  const colors = getColorClasses(colorScheme, highContrast);
+  const iconText = getIconTextClass(colorScheme, highContrast);
+  const borderClass = getBorderClass(colorScheme, highContrast);
+  const accentHex = {
+    green: '#22c55e',
+    blue: '#2563eb',
+    purple: '#9333ea',
+  }[colorScheme];
+  const accentBgClass = iconText.replace('text-', 'bg-');
   
   return (
     <div
@@ -33,12 +50,12 @@ export function MapView({ pickupLocation, dropoffLocation, highContrast, languag
                 <path
                   d="M 40 0 L 0 0 0 40"
                   fill="none"
-                  stroke={highContrast ? '#22c55e' : '#9ca3af'}
+                  stroke={highContrast ? accentHex : '#9ca3af'}
                   strokeWidth="1"
                 />
               </pattern>
               <pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse">
-                <circle cx="10" cy="10" r="1" fill={highContrast ? '#22c55e' : '#9ca3af'} />
+                <circle cx="10" cy="10" r="1" fill={highContrast ? accentHex : '#9ca3af'} />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
@@ -80,7 +97,7 @@ export function MapView({ pickupLocation, dropoffLocation, highContrast, languag
 
         {/* Map Label */}
         <div className={`absolute top-4 left-4 px-3 py-1 rounded-md ${
-          highContrast ? 'bg-green-900 text-white' : 'bg-white text-gray-700'
+          highContrast ? `${colors.primary} text-white ${borderClass}` : 'bg-white text-gray-700'
         } shadow-lg backdrop-blur-sm`}>
           <p className="text-sm">📍 {t('interactiveMap')}</p>
         </div>
@@ -91,17 +108,17 @@ export function MapView({ pickupLocation, dropoffLocation, highContrast, languag
             <div className="relative">
               {/* Pulsing circle background */}
               <div className={`absolute inset-0 rounded-full ${
-                highContrast ? 'bg-green-400' : 'bg-green-500'
+                accentBgClass
               } opacity-20 animate-ping`} style={{ width: '60px', height: '60px', top: '-10px', left: '-10px' }} />
               
               {/* Main marker */}
-              <div className={`relative ${highContrast ? 'text-green-400' : 'text-green-600'} drop-shadow-2xl`}>
+              <div className={`relative ${iconText} drop-shadow-2xl`}>
                 <MapPin className="h-12 w-12 fill-current drop-shadow-lg" />
               </div>
               
               {/* Label */}
               <div className={`absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium ${
-                highContrast ? 'bg-green-900 text-white border-2 border-green-400' : 'bg-white text-gray-900 shadow-lg'
+                highContrast ? `${colors.primary} text-white border-2 ${borderClass}` : 'bg-white text-gray-900 shadow-lg'
               }`}>
                 🚀 {t('pickup')}
               </div>
@@ -115,17 +132,17 @@ export function MapView({ pickupLocation, dropoffLocation, highContrast, languag
             <div className="relative">
               {/* Pulsing circle background */}
               <div className={`absolute inset-0 rounded-full ${
-                highContrast ? 'bg-green-400' : 'bg-green-500'
+                accentBgClass
               } opacity-20 animate-ping`} style={{ width: '60px', height: '60px', top: '-10px', left: '-10px', animationDelay: '0.2s' }} />
               
               {/* Main marker */}
-              <div className={`relative ${highContrast ? 'text-green-400' : 'text-green-600'} drop-shadow-2xl`}>
+              <div className={`relative ${iconText} drop-shadow-2xl`}>
                 <MapPin className="h-12 w-12 fill-current drop-shadow-lg" />
               </div>
               
               {/* Label */}
               <div className={`absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap px-3 py-1.5 rounded-full text-xs font-medium ${
-                highContrast ? 'bg-green-900 text-white border-2 border-green-400' : 'bg-white text-gray-900 shadow-lg'
+                highContrast ? `${colors.primary} text-white border-2 ${borderClass}` : 'bg-white text-gray-900 shadow-lg'
               }`}>
                 🎯 {t('dropoff')}
               </div>
@@ -138,8 +155,8 @@ export function MapView({ pickupLocation, dropoffLocation, highContrast, languag
           <svg className="absolute inset-0 pointer-events-none" width="100%" height="100%">
             <defs>
               <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor={highContrast ? '#22c55e' : '#16a34a'} stopOpacity="0.8" />
-                <stop offset="100%" stopColor={highContrast ? '#22c55e' : '#16a34a'} stopOpacity="0.4" />
+                <stop offset="0%" stopColor={accentHex} stopOpacity="0.8" />
+                <stop offset="100%" stopColor={accentHex} stopOpacity="0.4" />
               </linearGradient>
             </defs>
             <line

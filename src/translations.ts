@@ -14,7 +14,7 @@ export const translations = {
     language: 'Language',
     languageDesc: 'Change app language',
     colorScheme: 'Color Scheme',
-    colorSchemeDesc: 'Green and white colors are used throughout the app, designed to be accessible for color-blind users.',
+    colorSchemeDesc: 'Choose the accent color for the app while keeping accessibility in mind.',
     accessibilityTips: 'Accessibility Tips',
     tip1: 'Enable voice guidance to hear button descriptions',
     tip2: 'Use high contrast mode in bright sunlight',
@@ -42,6 +42,9 @@ export const translations = {
     work: 'Work',
     hospital: 'Hospital',
     market: 'Market',
+    typeAddress: 'Type Address',
+    enterAddress: 'Enter address...',
+    setLocation: 'Set Location',
     
     // Services
     ride: 'Ride',
@@ -89,7 +92,7 @@ export const translations = {
     language: 'زبان',
     languageDesc: 'ایپ کی زبان تبدیل کریں',
     colorScheme: 'رنگ سکیم',
-    colorSchemeDesc: 'پورے ایپ میں سبز اور سفید رنگ استعمال کیے گئے ہیں، جو رنگ اندھے صارفین کے لیے قابل رسائی ہیں۔',
+    colorSchemeDesc: 'ایپ کا مرکزی رنگ منتخب کریں جبکہ قابلِ رسائی رہیں۔',
     accessibilityTips: 'رسائی کے نکات',
     tip1: 'بٹن کی تفصیلات سننے کے لیے آواز کی رہنمائی فعال کریں',
     tip2: 'تیز دھوپ میں اعلیٰ تضاد موڈ استعمال کریں',
@@ -117,6 +120,9 @@ export const translations = {
     work: 'دفتر',
     hospital: 'ہسپتال',
     market: 'بازار',
+    typeAddress: 'پتہ ٹائپ کریں',
+    enterAddress: 'پتہ درج کریں...',
+    setLocation: 'مقام سیٹ کریں',
     
     // Services
     ride: 'سواری',

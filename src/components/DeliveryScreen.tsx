@@ -6,6 +6,7 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Switch } from './ui/switch';
 import { Location } from '../App';
+import { getButtonClass, getColorClasses, getHintBgClass, getIconBgClass, getIconTextClass, getBorderClass } from '../utils/colorScheme';
 import {
   Select,
   SelectContent,
@@ -20,6 +21,7 @@ interface DeliveryScreenProps {
   onBack: () => void;
   highContrast: boolean;
   voiceEnabled: boolean;
+  colorScheme?: 'green' | 'blue' | 'purple';
 }
 
 export function DeliveryScreen({
@@ -28,6 +30,7 @@ export function DeliveryScreen({
   onBack,
   highContrast,
   voiceEnabled,
+  colorScheme = 'green',
 }: DeliveryScreenProps) {
   const baseFare = 120;
   const [customFare, setCustomFare] = useState(baseFare);
@@ -50,6 +53,12 @@ export function DeliveryScreen({
       window.speechSynthesis.speak(utterance);
     }
   };
+  const colors = getColorClasses(colorScheme, highContrast);
+  const btnClass = getButtonClass(colorScheme, highContrast);
+  const iconText = getIconTextClass(colorScheme, highContrast);
+  const iconBg = getIconBgClass(colorScheme, highContrast);
+  const borderClass = getBorderClass(colorScheme, highContrast);
+  const hintClass = getHintBgClass(colorScheme, highContrast);
 
   const increaseFare = () => {
     const newFare = customFare + 10;
@@ -81,12 +90,12 @@ export function DeliveryScreen({
   return (
     <div className="h-[calc(100vh-80px)] flex flex-col overflow-hidden">
       {/* Header */}
-      <div className={`flex items-center gap-3 p-4 ${highContrast ? 'bg-black border-b-2 border-green-400' : 'bg-white border-b border-gray-200'}`}>
+      <div className={`flex items-center gap-3 p-4 ${highContrast ? `bg-black border-b-2 ${borderClass}` : 'bg-white border-b border-gray-200'}`}>
         <Button
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className={highContrast ? 'text-green-400 hover:bg-gray-800' : 'text-gray-700'}
+          className={highContrast ? `${iconText} hover:bg-gray-800` : 'text-gray-700'}
           aria-label="Go back"
         >
           <ArrowLeft className="h-6 w-6" />
@@ -97,26 +106,26 @@ export function DeliveryScreen({
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {/* Route Summary - Compact */}
-        <Card className={`p-3 ${highContrast ? 'bg-gray-900 border-green-400' : 'bg-gray-50'}`}>
+        <Card className={`p-3 ${highContrast ? `${colors.bgDark} ${borderClass}` : colors.primaryLight}`}>
           <div className="space-y-1 text-sm">
             <div className="flex items-center gap-2">
-              <Package className={`h-4 w-4 ${highContrast ? 'text-green-400' : 'text-green-600'}`} />
+              <Package className={`h-4 w-4 ${iconText}`} />
               <p className="truncate">{pickupLocation?.address || 'Not set'}</p>
             </div>
             <div className="flex items-center gap-2">
-              <Package className={`h-4 w-4 ${highContrast ? 'text-green-400' : 'text-green-600'}`} />
+              <Package className={`h-4 w-4 ${iconText}`} />
               <p className="truncate">{dropoffLocation?.address || 'Not set'}</p>
             </div>
           </div>
         </Card>
 
         {/* Package Type Selection */}
-        <Card className={`p-4 space-y-3 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
+        <Card className={`p-4 space-y-3 ${highContrast ? `${colors.bgDark} ${borderClass}` : ''}`}>
           <h3 className="text-lg">Package Type</h3>
           <Select value={packageType} onValueChange={handlePackageTypeSelect}>
             <SelectTrigger
               className={`h-12 ${
-                highContrast ? 'bg-gray-800 border-green-400 text-white' : ''
+                highContrast ? `bg-gray-800 ${borderClass} text-white` : ''
               }`}
               onFocus={() => speak('Select package type')}
             >
@@ -136,7 +145,7 @@ export function DeliveryScreen({
         </Card>
 
         {/* Package Details */}
-        <Card className={`p-4 space-y-4 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
+        <Card className={`p-4 space-y-4 ${highContrast ? `${colors.bgDark} ${borderClass}` : ''}`}>
           <h3 className="text-lg">Package Details</h3>
 
           <div className="space-y-2">
@@ -150,7 +159,7 @@ export function DeliveryScreen({
               onChange={(e) => setPackageDescription(e.target.value)}
               onFocus={() => speak('Enter package description')}
               className={`min-h-20 ${
-                highContrast ? 'bg-gray-800 border-green-400 text-white' : ''
+                highContrast ? `bg-gray-800 ${borderClass} text-white` : ''
               }`}
               aria-label="Package description"
             />
@@ -168,7 +177,7 @@ export function DeliveryScreen({
               onChange={(e) => setReceiverPhone(e.target.value)}
               onFocus={() => speak('Enter receiver phone number')}
               className={`h-12 ${
-                highContrast ? 'bg-gray-800 border-green-400 text-white' : ''
+                highContrast ? `bg-gray-800 ${borderClass} text-white` : ''
               }`}
               aria-label="Receiver phone number"
             />
@@ -176,7 +185,7 @@ export function DeliveryScreen({
         </Card>
 
         {/* Cash on Delivery (COD) */}
-        <Card className={`p-4 space-y-3 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
+        <Card className={`p-4 space-y-3 ${highContrast ? `${colors.bgDark} ${borderClass}` : ''}`}>
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-lg">Cash on Delivery (COD)</h3>
@@ -206,7 +215,7 @@ export function DeliveryScreen({
                   onChange={(e) => setCodAmount(Number(e.target.value))}
                   onFocus={() => speak('Enter amount to collect from receiver')}
                   className={`h-12 text-xl ${
-                    highContrast ? 'bg-gray-800 border-green-400 text-white' : ''
+                    highContrast ? `bg-gray-800 ${borderClass} text-white` : ''
                   }`}
                   aria-label="COD amount"
                 />
@@ -219,9 +228,9 @@ export function DeliveryScreen({
         </Card>
 
         {/* Fare Section */}
-        <Card className={`p-4 space-y-4 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
+        <Card className={`p-4 space-y-4 ${highContrast ? `${colors.bgDark} ${borderClass}` : ''}`}>
           <div className="flex items-center gap-2">
-            <DollarSign className={`h-5 w-5 ${highContrast ? 'text-green-400' : 'text-green-600'}`} />
+            <DollarSign className={`h-5 w-5 ${iconText}`} />
             <div className="flex-1">
               <h3 className="text-lg">Delivery Fare</h3>
               <p className="text-sm opacity-70">Expected base fare: ₹{baseFare}</p>
@@ -242,7 +251,7 @@ export function DeliveryScreen({
                 disabled={customFare <= baseFare}
                 className={`flex-1 h-14 ${
                   highContrast
-                    ? 'bg-gray-700 hover:bg-gray-600 text-white border border-green-400'
+                    ? `bg-gray-700 hover:bg-gray-600 text-white ${borderClass}`
                     : 'bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-300'
                 }`}
                 aria-label="Decrease fare by 10 rupees"
@@ -253,11 +262,7 @@ export function DeliveryScreen({
 
               <Button
                 onClick={increaseFare}
-                className={`flex-1 h-14 ${
-                  highContrast
-                    ? 'bg-green-900 hover:bg-green-800 text-white border border-green-400'
-                    : 'bg-green-600 hover:bg-green-700 text-white'
-                }`}
+                className={`flex-1 h-14 ${btnClass} text-white`}
                 aria-label="Increase fare by 10 rupees"
               >
                 <Plus className="h-6 w-6 mr-2" />
@@ -272,7 +277,7 @@ export function DeliveryScreen({
         </Card>
 
         {/* Delivery Status Preview */}
-        <Card className={`p-4 ${highContrast ? 'bg-gray-900 border-green-400' : 'bg-green-50'}`}>
+        <Card className={`p-4 ${highContrast ? `${colors.bgDark} ${borderClass}` : colors.primaryLight}`}>
           <h3 className="text-lg mb-3">You'll receive updates:</h3>
           <div className="space-y-2 text-sm opacity-70">
             <p>✓ When rider accepts your delivery</p>
@@ -287,11 +292,7 @@ export function DeliveryScreen({
         <Button
           onClick={handleConfirm}
           disabled={!packageDescription || !receiverPhone || !packageType}
-          className={`w-full h-14 ${
-            highContrast
-              ? 'bg-green-900 hover:bg-green-800 text-white border-2 border-green-400'
-              : 'bg-green-600 hover:bg-green-700 text-white'
-          }`}
+          className={`w-full h-14 ${btnClass} text-white`}
           aria-label="Confirm delivery booking"
         >
           Confirm Delivery - ₹{customFare}
@@ -299,9 +300,7 @@ export function DeliveryScreen({
 
         {/* Voice Hint */}
         {voiceEnabled && (
-          <div className={`flex items-center gap-2 p-3 rounded-lg ${
-            highContrast ? 'bg-green-900 text-white' : 'bg-green-50 text-green-800'
-          }`}>
+          <div className={`flex items-center gap-2 p-3 rounded-lg ${hintClass}`}>
             <Volume2 className="h-5 w-5" />
             <p className="text-sm">Voice guidance is active</p>
           </div>

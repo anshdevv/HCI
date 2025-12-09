@@ -8,6 +8,7 @@ import { VoiceControl } from "./components/VoiceControl";
 import { LiveTracking } from "./components/LiveTracking";
 import { Settings } from "lucide-react";
 import { Button } from "./components/ui/button";
+import { getHeaderClass } from "./utils/colorScheme";
 
 export type Screen =
   | "home"
@@ -27,7 +28,7 @@ export interface AppSettings {
   voiceEnabled: boolean;
   language: 'en' | 'ur';
   fontSize: number;
-  colorScheme: 'emerald' | 'indigo';
+  colorScheme: 'green' | 'blue' | 'purple';
 }
 
 export interface BookingDetails {
@@ -51,7 +52,7 @@ export default function App() {
     voiceEnabled: false,
     language: 'en',
     fontSize: 16,
-    colorScheme: 'emerald',
+    colorScheme: 'green',
   });
   const [showSettings, setShowSettings] = useState(false);
   const [bookingDetails, setBookingDetails] =
@@ -99,11 +100,11 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen overflow-x-hidden ${settings.highContrast ? "bg-black text-white" : "bg-white text-gray-900"} theme-${settings.colorScheme}`}
+      className={`min-h-screen ${settings.highContrast ? "bg-black text-white" : "bg-white text-gray-900"}`}
     >
       {/* Header */}
       <header
-        className={`${settings.highContrast ? "bg-green-900 border-green-700" : "bg-green-600"} text-white p-4 shadow-md`}
+        className={`${getHeaderClass(settings.colorScheme, settings.highContrast)} text-white p-4 shadow-md`}
       >
         <div className="max-w-md mx-auto flex items-center justify-between">
           <h1 className="text-2xl">RideAccess</h1>
@@ -111,7 +112,7 @@ export default function App() {
             variant="ghost"
             size="icon"
             onClick={() => setShowSettings(!showSettings)}
-            className="text-white hover:bg-green-700"
+            className="text-white hover:bg-white/10"
           >
             <Settings className="h-6 w-6" />
           </Button>
@@ -149,6 +150,7 @@ export default function App() {
             voiceEnabled={settings.voiceEnabled}
             language={settings.language}
             fontSize={settings.fontSize}
+            colorScheme={settings.colorScheme}
           />
         )}
 
@@ -157,9 +159,10 @@ export default function App() {
             pickupLocation={pickupLocation}
             dropoffLocation={dropoffLocation}
             onBack={handleBack}
+            onStartTracking={handleStartTracking}
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}
-            onStartTracking={handleStartTracking}
+            colorScheme={settings.colorScheme}
           />
         )}
 
@@ -170,6 +173,7 @@ export default function App() {
             onBack={handleBack}
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}
+            colorScheme={settings.colorScheme}
           />
         )}
 
@@ -178,16 +182,17 @@ export default function App() {
             onBack={handleBack}
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}
+            colorScheme={settings.colorScheme}
           />
         )}
 
         {currentScreen === "tracking" && (
           <LiveTracking
             bookingDetails={bookingDetails}
-            initialStatus="accepted"
             onBack={handleBack}
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}
+            colorScheme={settings.colorScheme}
           />
         )}
       </main>

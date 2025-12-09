@@ -3,13 +3,14 @@ import { ArrowLeft, MapPin, Phone, MessageSquare, User, Star, Volume2 } from 'lu
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { BookingDetails } from '../App';
+import { getButtonClass, getColorClasses, getHintBgClass, getIconTextClass, getBorderClass } from '../utils/colorScheme';
 
 interface LiveTrackingProps {
   bookingDetails: BookingDetails | null;
   onBack: () => void;
   highContrast: boolean;
   voiceEnabled: boolean;
-  initialStatus?: DeliveryStatus;
+  colorScheme?: 'green' | 'blue' | 'purple';
 }
 
 type DeliveryStatus = 'searching' | 'accepted' | 'arriving' | 'picked_up' | 'in_transit' | 'delivered';
@@ -27,18 +28,24 @@ export function LiveTracking({
   onBack,
   highContrast,
   voiceEnabled,
-  initialStatus = 'searching',
+  colorScheme = 'green',
 }: LiveTrackingProps) {
-  const [status, setStatus] = useState<DeliveryStatus>(initialStatus);
+  const [status, setStatus] = useState<DeliveryStatus>('searching');
   const [eta, setEta] = useState(5);
   const [driverPosition, setDriverPosition] = useState({ x: 10, y: 10 });
+  const colors = getColorClasses(colorScheme, highContrast);
+  const iconText = getIconTextClass(colorScheme, highContrast);
+  const btnClass = getButtonClass(colorScheme, highContrast);
+  const borderClass = getBorderClass(colorScheme, highContrast);
+  const hintClass = getHintBgClass(colorScheme, highContrast);
+  const accentBgClass = iconText.replace('text-', 'bg-');
 
   const driverInfo: DriverInfo = {
     name: 'Ahmed Khan',
     rating: 4.8,
     phone: '+92 300 1234567',
     vehicleNumber: 'ABC-123',
-    photo: '',
+    photo: '👤',
   };
 
   const speak = (text: string) => {
@@ -59,10 +66,7 @@ export function LiveTracking({
       'delivered',
     ];
 
-    let currentIndex = Math.max(
-      statusTimeline.indexOf(initialStatus),
-      0,
-    );
+    let currentIndex = 0;
     const interval = setInterval(() => {
       if (currentIndex < statusTimeline.length - 1) {
         currentIndex++;
@@ -82,7 +86,7 @@ export function LiveTracking({
     }, 5000); // Change status every 5 seconds
 
     return () => clearInterval(interval);
-  }, [initialStatus, bookingDetails?.type]);
+  }, []);
 
   useEffect(() => {
     // Simulate driver movement
@@ -124,7 +128,7 @@ export function LiveTracking({
           variant="ghost"
           size="icon"
           onClick={onBack}
-          className={highContrast ? 'text-green-400 hover:bg-gray-800' : 'text-gray-700'}
+          className={highContrast ? `${iconText} hover:bg-gray-800` : 'text-gray-700'}
           aria-label="Go back"
         >
           <ArrowLeft className="h-6 w-6" />
@@ -134,10 +138,10 @@ export function LiveTracking({
 
       {/* Status Banner */}
       <Card className={`p-4 ${
-        highContrast ? 'bg-green-900 border-green-400' : 'bg-green-50'
+        highContrast ? `${colors.primary} ${borderClass} text-white` : colors.primaryLight
       }`}>
         <div className="text-center">
-          <p className={`text-lg ${highContrast ? 'text-white' : 'text-green-800'}`}>
+          <p className={`text-lg ${highContrast ? 'text-white' : colors.textLight}`}>
             {getStatusMessage()}
           </p>
           {status !== 'searching' && status !== 'delivered' && (
@@ -149,15 +153,13 @@ export function LiveTracking({
       {/* Progress Bar */}
       <div className={`h-2 rounded-full ${highContrast ? 'bg-gray-800' : 'bg-gray-200'}`}>
         <div
-          className={`h-full rounded-full transition-all duration-500 ${
-            highContrast ? 'bg-green-400' : 'bg-green-600'
-          }`}
+          className={`h-full rounded-full transition-all duration-500 ${accentBgClass}`}
           style={{ width: `${getProgressPercentage()}%` }}
         />
       </div>
 
       {/* Live Map */}
-      <Card className={`p-4 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
+      <Card className={`p-4 ${highContrast ? `${colors.bgDark} ${borderClass}` : ''}`}>
         <div
           className={`relative h-64 rounded-lg overflow-hidden ${
             highContrast ? 'bg-gray-800' : 'bg-gray-100'
@@ -182,12 +184,12 @@ export function LiveTracking({
 
           {/* Pickup Location */}
           <div className="absolute" style={{ left: '10%', top: '10%' }}>
-            <MapPin className={`h-8 w-8 ${highContrast ? 'text-green-400' : 'text-green-600'} fill-current`} />
+            <MapPin className={`h-8 w-8 ${iconText} fill-current`} />
           </div>
 
           {/* Dropoff Location */}
           <div className="absolute" style={{ left: '90%', top: '90%' }}>
-            <MapPin className={`h-8 w-8 ${highContrast ? 'text-green-400' : 'text-green-600'} fill-current`} />
+            <MapPin className={`h-8 w-8 ${iconText} fill-current`} />
           </div>
 
           {/* Driver Position */}
@@ -196,7 +198,7 @@ export function LiveTracking({
               className="absolute transition-all duration-1000"
               style={{ left: `${driverPosition.x}%`, top: `${driverPosition.y}%` }}
             >
-              <div className={`relative ${highContrast ? 'text-green-400' : 'text-green-600'}`}>
+              <div className={`relative ${iconText}`}>
                 <div className="animate-pulse">
                   <div className="h-6 w-6 rounded-full bg-current flex items-center justify-center">
                     <User className="h-4 w-4 text-white" />
@@ -225,12 +227,12 @@ export function LiveTracking({
 
       {/* Driver Info */}
       {status !== 'searching' && (
-        <Card className={`p-4 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
+        <Card className={`p-4 ${highContrast ? `${colors.bgDark} ${borderClass}` : ''}`}>
           <div className="flex items-center gap-4">
-            <div className={`h-16 w-16 rounded-full flex items-center justify-center ${
-              highContrast ? 'bg-green-900 text-green-400' : 'bg-green-100 text-green-700'
+            <div className={`h-16 w-16 rounded-full flex items-center justify-center text-3xl ${
+              highContrast ? colors.primary : colors.primaryLight
             }`}>
-              <User className="h-8 w-8" />
+              {driverInfo.photo}
             </div>
             
             <div className="flex-1">
@@ -248,7 +250,7 @@ export function LiveTracking({
                 size="icon"
                 variant="outline"
                 onClick={() => speak('Calling rider')}
-                className={highContrast ? 'border-green-400' : ''}
+                className={highContrast ? borderClass : ''}
                 aria-label="Call driver"
               >
                 <Phone className="h-5 w-5" />
@@ -257,7 +259,7 @@ export function LiveTracking({
                 size="icon"
                 variant="outline"
                 onClick={() => speak('Opening chat')}
-                className={highContrast ? 'border-green-400' : ''}
+                className={highContrast ? borderClass : ''}
                 aria-label="Message driver"
               >
                 <MessageSquare className="h-5 w-5" />
@@ -268,7 +270,7 @@ export function LiveTracking({
       )}
 
       {/* Booking Details */}
-      <Card className={`p-4 ${highContrast ? 'bg-gray-900 border-green-400' : 'bg-gray-50'}`}>
+      <Card className={`p-4 ${highContrast ? `${colors.bgDark} ${borderClass}` : 'bg-gray-50'}`}>
         <h3 className="text-lg mb-3">Booking Details</h3>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
@@ -301,11 +303,11 @@ export function LiveTracking({
       </Card>
 
       {/* Status Updates */}
-      <Card className={`p-4 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
+      <Card className={`p-4 ${highContrast ? `${colors.bgDark} ${borderClass}` : ''}`}>
         <h3 className="text-lg mb-3">Status Updates</h3>
         <div className="space-y-3">
           <div className={`flex items-start gap-3 ${status === 'searching' ? 'opacity-50' : ''}`}>
-            <div className={`mt-1 h-3 w-3 rounded-full ${status === 'searching' ? 'bg-gray-400' : highContrast ? 'bg-green-400' : 'bg-green-600'}`} />
+            <div className={`mt-1 h-3 w-3 rounded-full ${status === 'searching' ? 'bg-gray-400' : accentBgClass}`} />
             <div className="flex-1">
               <p>Rider Assigned</p>
               <p className="text-sm opacity-70">
@@ -315,7 +317,7 @@ export function LiveTracking({
           </div>
 
           <div className={`flex items-start gap-3 ${['searching', 'accepted'].includes(status) ? 'opacity-50' : ''}`}>
-            <div className={`mt-1 h-3 w-3 rounded-full ${['searching', 'accepted'].includes(status) ? 'bg-gray-400' : highContrast ? 'bg-green-400' : 'bg-green-600'}`} />
+            <div className={`mt-1 h-3 w-3 rounded-full ${['searching', 'accepted'].includes(status) ? 'bg-gray-400' : accentBgClass}`} />
             <div className="flex-1">
               <p>{bookingDetails?.type === 'delivery' ? 'Package Pickup' : 'Rider Arrival'}</p>
               <p className="text-sm opacity-70">
@@ -325,7 +327,7 @@ export function LiveTracking({
           </div>
 
           <div className={`flex items-start gap-3 ${!['in_transit', 'delivered'].includes(status) ? 'opacity-50' : ''}`}>
-            <div className={`mt-1 h-3 w-3 rounded-full ${!['in_transit', 'delivered'].includes(status) ? 'bg-gray-400' : highContrast ? 'bg-green-400' : 'bg-green-600'}`} />
+            <div className={`mt-1 h-3 w-3 rounded-full ${!['in_transit', 'delivered'].includes(status) ? 'bg-gray-400' : accentBgClass}`} />
             <div className="flex-1">
               <p>{bookingDetails?.type === 'delivery' ? 'In Transit' : 'Trip Started'}</p>
               <p className="text-sm opacity-70">
@@ -335,7 +337,7 @@ export function LiveTracking({
           </div>
 
           <div className={`flex items-start gap-3 ${status !== 'delivered' ? 'opacity-50' : ''}`}>
-            <div className={`mt-1 h-3 w-3 rounded-full ${status !== 'delivered' ? 'bg-gray-400' : highContrast ? 'bg-green-400' : 'bg-green-600'}`} />
+            <div className={`mt-1 h-3 w-3 rounded-full ${status !== 'delivered' ? 'bg-gray-400' : accentBgClass}`} />
             <div className="flex-1">
               <p>{bookingDetails?.type === 'delivery' ? 'Delivered' : 'Trip Completed'}</p>
               <p className="text-sm opacity-70">
@@ -348,9 +350,7 @@ export function LiveTracking({
 
       {/* Voice Hint */}
       {voiceEnabled && (
-        <div className={`flex items-center gap-2 p-3 rounded-lg ${
-          highContrast ? 'bg-green-900 text-white' : 'bg-green-50 text-green-800'
-        }`}>
+        <div className={`flex items-center gap-2 p-3 rounded-lg ${hintClass}`}>
           <Volume2 className="h-5 w-5" />
           <p className="text-sm">You'll hear updates as status changes</p>
         </div>

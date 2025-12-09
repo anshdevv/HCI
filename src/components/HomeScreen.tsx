@@ -1,11 +1,11 @@
-import { MapPin, Package, ShoppingBag, Volume2, Bike, Clock, Mic, Navigation, Home, Briefcase, Star } from 'lucide-react';
+import { MapPin, Package, ShoppingBag, Volume2, Bike, Mic, Navigation, Home, Briefcase, Star, Type } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { MapView } from './MapView';
 import { Location } from '../App';
 import { useState } from 'react';
-import { Card } from './ui/card';
 import { getTranslation } from '../translations';
+import { getButtonClass, getColorClasses, getIconBgClass, getIconTextClass, getRingClass, getBorderClass, getHintBgClass } from '../utils/colorScheme';
 
 interface HomeScreenProps {
   pickupLocation: Location | null;
@@ -17,6 +17,7 @@ interface HomeScreenProps {
   voiceEnabled: boolean;
   language?: 'en' | 'ur';
   fontSize?: number;
+  colorScheme?: 'green' | 'blue' | 'purple';
 }
 
 export function HomeScreen({
@@ -29,13 +30,21 @@ export function HomeScreen({
   voiceEnabled,
   language = 'en',
   fontSize = 16,
+  colorScheme = 'green',
 }: HomeScreenProps) {
   const [showLocationPicker, setShowLocationPicker] = useState<'pickup' | 'dropoff' | null>(null);
   const [isListening, setIsListening] = useState(false);
-  const [pickupText, setPickupText] = useState('');
-  const [dropoffText, setDropoffText] = useState('');
+  const [showTextInput, setShowTextInput] = useState(false);
+  const [textAddress, setTextAddress] = useState('');
   
   const t = (key: any) => getTranslation(key, language);
+  const colors = getColorClasses(colorScheme, highContrast);
+  const iconBg = getIconBgClass(colorScheme, highContrast);
+  const iconText = getIconTextClass(colorScheme, highContrast);
+  const btnClass = getButtonClass(colorScheme, highContrast);
+  const borderClass = getBorderClass(colorScheme, highContrast);
+  const hintClass = getHintBgClass(colorScheme, highContrast);
+  const ringClass = getRingClass(colorScheme);
 
   // Mock recent/frequent locations with icons
   const savedLocations = [
@@ -151,13 +160,34 @@ export function HomeScreen({
     setShowLocationPicker(null);
   };
 
+  const handleTextInputSubmit = () => {
+    if (!textAddress.trim() || !showLocationPicker) return;
+    
+    const location: Location = {
+      address: textAddress,
+      lat: 40.7128 + Math.random() * 0.1,
+      lng: -74.006 + Math.random() * 0.1,
+    };
+    
+    if (showLocationPicker === 'pickup') {
+      onPickupChange(location);
+    } else {
+      onDropoffChange(location);
+    }
+    
+    speak(`${showLocationPicker === 'pickup' ? t('pickup') : t('dropoff')} ${t('setTo')} ${textAddress}`);
+    setTextAddress('');
+    setShowTextInput(false);
+    setShowLocationPicker(null);
+  };
+
   const handleServiceClick = (service: 'ride' | 'delivery' | 'shops', label: string) => {
     speak(`${label} ${t('selected')}`);
     onServiceSelect(service);
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col overflow-x-hidden" style={{ direction: language === 'ur' ? 'rtl' : 'ltr' }}>
+    <div className="h-[calc(100vh-80px)] flex flex-col overflow-hidden" style={{ direction: language === 'ur' ? 'rtl' : 'ltr' }}>
       {/* Map View */}
       <div className="relative flex-1 overflow-hidden">
         <MapView
@@ -165,6 +195,7 @@ export function HomeScreen({
           dropoffLocation={dropoffLocation}
           highContrast={highContrast}
           language={language}
+          colorScheme={colorScheme}
         />
 
         {/* Location Selection Cards - Overlaying on map */}
@@ -176,17 +207,15 @@ export function HomeScreen({
                 speak(t('selectPickup'));
                 setShowLocationPicker('pickup');
               }}
-              className={`w-full p-4 rounded-xl shadow-2xl backdrop-blur-md transition-all duration-300 transform hover:scale-102 active:scale-98 ${
+              className={`w-full p-4 rounded-xl shadow-2xl backdrop-blur-md transition-all duration-200 ${
                 highContrast 
-                  ? 'bg-gray-900/95 border-2 border-green-400 text-white' 
+                  ? `bg-gray-900/95 border-2 ${borderClass} text-white` 
                   : 'bg-white/95 border border-gray-200 text-gray-900'
-              } ${pickupLocation ? 'ring-2 ring-green-500' : ''}`}
+              } ${pickupLocation ? `ring-2 ${ringClass}` : ''}`}
             >
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${
-                  highContrast ? 'bg-green-900' : 'bg-green-100'
-                }`}>
-                  <MapPin className={`h-6 w-6 ${highContrast ? 'text-green-400' : 'text-green-600'}`} />
+                <div className={`p-2 rounded-lg ${iconBg}`}>
+                  <MapPin className={`h-6 w-6 ${iconText}`} />
                 </div>
                 <div className="flex-1 text-left" style={{ textAlign: language === 'ur' ? 'right' : 'left' }}>
                   <p className="text-xs opacity-70">{t('pickupFrom')}</p>
@@ -203,17 +232,15 @@ export function HomeScreen({
                 speak(t('selectDropoff'));
                 setShowLocationPicker('dropoff');
               }}
-              className={`w-full p-4 rounded-xl shadow-2xl backdrop-blur-md transition-all duration-300 transform hover:scale-102 active:scale-98 ${
+              className={`w-full p-4 rounded-xl shadow-2xl backdrop-blur-md transition-all duration-200 ${
                 highContrast 
-                  ? 'bg-gray-900/95 border-2 border-green-400 text-white' 
+                  ? `bg-gray-900/95 border-2 ${borderClass} text-white` 
                   : 'bg-white/95 border border-gray-200 text-gray-900'
-              } ${dropoffLocation ? 'ring-2 ring-green-500' : ''}`}
+              } ${dropoffLocation ? `ring-2 ${ringClass}` : ''}`}
             >
               <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${
-                  highContrast ? 'bg-green-900' : 'bg-green-100'
-                }`}>
-                  <MapPin className={`h-6 w-6 ${highContrast ? 'text-green-400' : 'text-green-600'}`} />
+                <div className={`p-2 rounded-lg ${iconBg}`}>
+                  <MapPin className={`h-6 w-6 ${iconText}`} />
                 </div>
                 <div className="flex-1 text-left" style={{ textAlign: language === 'ur' ? 'right' : 'left' }}>
                   <p className="text-xs opacity-70">{t('dropoffAt')}</p>
@@ -230,103 +257,93 @@ export function HomeScreen({
         {showLocationPicker && (
           <div className={`absolute inset-0 z-20 ${
             highContrast ? 'bg-black' : 'bg-white'
-          } overflow-y-auto touch-pan-y overscroll-contain max-w-full`}>
+          } overflow-y-auto`}>
             <div className="p-4 space-y-3">
               {/* Header */}
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg">
+                <h3>
                   {showLocationPicker === 'pickup' ? t('pickupLocation') : t('dropoffLocation')}
                 </h3>
                 <Button
                   variant="ghost"
-                  onClick={() => setShowLocationPicker(null)}
-                  className={highContrast ? 'text-green-400' : ''}
-                >
-                  Close
-                </Button>
-              </div>
-
-              {/* Manual entry */}
-              <div className="space-y-2">
-                <Input
-                  placeholder={showLocationPicker === 'pickup' ? 'Enter pickup address' : 'Enter dropoff address'}
-                  value={showLocationPicker === 'pickup' ? pickupText : dropoffText}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (showLocationPicker === 'pickup') {
-                      setPickupText(value);
-                    } else {
-                      setDropoffText(value);
-                    }
-                  }}
-                  className={highContrast ? 'bg-gray-800 border-green-400 text-white' : ''}
-                />
-                <Button
                   onClick={() => {
-                    const value = showLocationPicker === 'pickup' ? pickupText : dropoffText;
-                    if (!value.trim()) return;
-                    const location: Location = {
-                      address: value.trim(),
-                      lat: 40.7128 + Math.random() * 0.05,
-                      lng: -74.006 + Math.random() * 0.05,
-                    };
-                    if (showLocationPicker === 'pickup') {
-                      onPickupChange(location);
-                    } else {
-                      onDropoffChange(location);
-                    }
-                    speak(`${showLocationPicker === 'pickup' ? t('pickup') : t('dropoff')} ${t('setTo')} ${value}`);
                     setShowLocationPicker(null);
+                    setShowTextInput(false);
+                    setTextAddress('');
                   }}
-                  className={highContrast ? 'bg-green-900 border border-green-400' : ''}
+                  className={highContrast ? iconText : ''}
                 >
-                  Save Location
+                  {t('close')}
                 </Button>
               </div>
 
-              {/* Quick Actions - Large Touch Targets */}
-              <div className="grid grid-cols-2 gap-3">
-                {/* Current Location */}
+              {/* Quick Actions */}
+              <div className="grid grid-cols-3 gap-3">
                 <button
                   onClick={() => handleUseCurrentLocation(showLocationPicker)}
-                  className={`group p-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${
-                    highContrast
-                      ? 'bg-gradient-to-br from-green-900 to-green-800 border-2 border-green-400'
-                      : 'bg-gradient-to-br from-green-600 to-green-700'
-                  }`}
+                  className={`p-4 rounded-xl transition-all duration-200 shadow-md ${
+                    btnClass
+                  } text-white`}
                 >
                   <div className="flex flex-col items-center gap-2 text-white">
-                    <div className="relative">
-                      <div className="absolute inset-0 blur-lg opacity-50 bg-white" />
-                      <Navigation className="h-10 w-10 relative z-10 transition-transform duration-300 group-hover:scale-110" />
-                    </div>
-                    <span className="text-sm text-center">{t('currentLocation')}</span>
+                    <Navigation className="h-8 w-8" />
+                    <span className="text-xs text-center">{t('currentLocation')}</span>
                   </div>
                 </button>
 
-                {/* Voice Input */}
                 <button
                   onClick={() => handleVoiceInput(showLocationPicker)}
                   disabled={isListening}
-                  className={`group p-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${
-                    highContrast
-                      ? 'bg-gradient-to-br from-green-900 to-green-800 border-2 border-green-400'
-                      : 'bg-gradient-to-br from-green-600 to-green-700'
-                  } ${isListening ? 'animate-pulse' : ''}`}
+                  className={`p-4 rounded-xl transition-all duration-200 shadow-md ${
+                    btnClass
+                  } ${isListening ? 'animate-pulse' : ''} text-white`}
                 >
                   <div className="flex flex-col items-center gap-2 text-white">
-                    <div className="relative">
-                      <div className="absolute inset-0 blur-lg opacity-50 bg-white" />
-                      <Mic className={`h-10 w-10 relative z-10 transition-transform duration-300 ${isListening ? 'animate-pulse' : 'group-hover:scale-110'}`} />
-                    </div>
-                    <span className="text-sm text-center">
+                    <Mic className="h-8 w-8" />
+                    <span className="text-xs text-center">
                       {isListening ? t('listening') : t('speakLocation')}
                     </span>
                   </div>
                 </button>
+
+                <button
+                  onClick={() => setShowTextInput(!showTextInput)}
+                  className={`p-4 rounded-xl transition-all duration-200 shadow-md ${
+                    btnClass
+                  } text-white`}
+                >
+                  <div className="flex flex-col items-center gap-2 text-white">
+                    <Type className="h-8 w-8" />
+                    <span className="text-xs text-center">{t('typeAddress')}</span>
+                  </div>
+                </button>
               </div>
 
-              {/* Saved Locations - Visual Grid */}
+              {/* Text Input Section */}
+              {showTextInput && (
+                <div className="space-y-2">
+                  <Input
+                    value={textAddress}
+                    onChange={(e) => setTextAddress(e.target.value)}
+                    placeholder={t('enterAddress')}
+                    className={`h-12 ${highContrast ? `bg-gray-800 ${borderClass} text-white` : ''}`}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        handleTextInputSubmit();
+                      }
+                    }}
+                  />
+                  <Button
+                    onClick={handleTextInputSubmit}
+                    disabled={!textAddress.trim()}
+                    className={`w-full ${btnClass} text-white`}
+                  >
+                    {t('setLocation')}
+                  </Button>
+                </div>
+              )}
+
+              {/* Saved Locations */}
               <div>
                 <h4 className="text-sm opacity-70 mb-2">{t('savedPlaces')}</h4>
                 <div className="grid grid-cols-2 gap-3">
@@ -334,14 +351,14 @@ export function HomeScreen({
                     <button
                       key={location.address}
                       onClick={() => handleSavedLocationSelect(location, showLocationPicker)}
-                      className={`group p-4 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg ${
+                      className={`p-4 rounded-xl transition-all duration-200 shadow-md ${
                         highContrast
-                          ? 'bg-gray-900 border-2 border-green-400 hover:bg-gray-800'
+                          ? `bg-gray-900 border-2 ${borderClass} hover:bg-gray-800`
                           : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
                       }`}
                     >
                       <div className="flex flex-col items-center gap-2">
-                        <div className={`h-12 w-12 rounded-full flex items-center justify-center ${highContrast ? 'bg-green-900 text-green-400' : 'bg-green-100 text-green-700'}`}>
+                        <div className={iconText}>
                           {location.icon}
                         </div>
                         <span className="text-sm text-center">{location.label}</span>
@@ -356,7 +373,7 @@ export function HomeScreen({
       </div>
 
       {/* Service Options - Fixed Bottom */}
-      <div className={`p-4 ${highContrast ? 'bg-black border-t-2 border-green-400' : 'bg-white border-t border-gray-200'} shadow-2xl`}>
+      <div className={`p-4 ${highContrast ? `bg-black border-t-2 ${borderClass}` : 'bg-white border-t border-gray-200'} shadow-2xl`}>
         <h2 className={`text-base mb-3 ${highContrast ? 'text-white' : 'text-gray-900'}`}>
           {t('chooseService')}
         </h2>
@@ -365,83 +382,42 @@ export function HomeScreen({
           <button
             onClick={() => handleServiceClick('ride', t('ride'))}
             disabled={!pickupLocation || !dropoffLocation}
-            className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 active:scale-95 shadow-lg ${
-              highContrast
-                ? 'bg-gradient-to-br from-green-900 to-green-800 hover:from-green-800 hover:to-green-700 text-white border-2 border-green-400 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:translate-y-0'
-                : 'bg-gradient-to-br from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white disabled:opacity-50 disabled:hover:scale-100 disabled:hover:translate-y-0 shadow-green-200'
+            className={`relative p-4 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-200 shadow-md ${
+              `${btnClass} text-white disabled:opacity-50`
             }`}
             aria-label={t('rideLabel')}
           >
-            {/* Icon layer with shadow and glow effect */}
-            <div className="relative">
-              <div className={`absolute inset-0 blur-lg opacity-50 ${
-                highContrast ? 'bg-green-400' : 'bg-white'
-              }`} />
-              <Bike className="h-10 w-10 relative z-10 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-            </div>
-            <span className="text-sm relative z-10">{t('ride')}</span>
-            
-            {/* Shimmer effect on hover */}
-            <div className="absolute inset-0 rounded-xl overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -translate-x-full group-hover:translate-x-full transition-all duration-700" />
-            </div>
+            <Bike className="h-8 w-8" />
+            <span className="text-sm">{t('ride')}</span>
           </button>
 
           <button
             onClick={() => handleServiceClick('delivery', t('parcel'))}
             disabled={!pickupLocation || !dropoffLocation}
-            className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 active:scale-95 shadow-lg ${
-              highContrast
-                ? 'bg-gradient-to-br from-green-900 to-green-800 hover:from-green-800 hover:to-green-700 text-white border-2 border-green-400 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:translate-y-0'
-                : 'bg-gradient-to-br from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white disabled:opacity-50 disabled:hover:scale-100 disabled:hover:translate-y-0 shadow-green-200'
+            className={`relative p-4 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-200 shadow-md ${
+              `${btnClass} text-white disabled:opacity-50`
             }`}
             aria-label={t('parcelLabel')}
           >
-            {/* Icon layer with shadow and glow effect */}
-            <div className="relative">
-              <div className={`absolute inset-0 blur-lg opacity-50 ${
-                highContrast ? 'bg-green-400' : 'bg-white'
-              }`} />
-              <Package className="h-10 w-10 relative z-10 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-            </div>
-            <span className="text-sm relative z-10">{t('parcel')}</span>
-            
-            {/* Shimmer effect on hover */}
-            <div className="absolute inset-0 rounded-xl overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -translate-x-full group-hover:translate-x-full transition-all duration-700" />
-            </div>
+            <Package className="h-8 w-8" />
+            <span className="text-sm">{t('parcel')}</span>
           </button>
 
           <button
             onClick={() => handleServiceClick('shops', t('shops'))}
-            className={`group relative aspect-square rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 active:scale-95 shadow-lg ${
-              highContrast
-                ? 'bg-gradient-to-br from-green-900 to-green-800 hover:from-green-800 hover:to-green-700 text-white border-2 border-green-400'
-                : 'bg-gradient-to-br from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white shadow-green-200'
+            className={`relative p-4 rounded-xl flex flex-col items-center justify-center gap-2 transition-all duration-200 shadow-md ${
+              `${btnClass} text-white`
             }`}
             aria-label={t('shopsLabel')}
           >
-            {/* Icon layer with shadow and glow effect */}
-            <div className="relative">
-              <div className={`absolute inset-0 blur-lg opacity-50 ${
-                highContrast ? 'bg-green-400' : 'bg-white'
-              }`} />
-              <ShoppingBag className="h-10 w-10 relative z-10 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-            </div>
-            <span className="text-sm relative z-10">{t('shops')}</span>
-            
-            {/* Shimmer effect on hover */}
-            <div className="absolute inset-0 rounded-xl overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -translate-x-full group-hover:translate-x-full transition-all duration-700" />
-            </div>
+            <ShoppingBag className="h-8 w-8" />
+            <span className="text-sm">{t('shops')}</span>
           </button>
         </div>
 
-        {/* Voice Hint - Compact */}
+        {/* Voice Hint */}
         {voiceEnabled && (
-          <div className={`flex items-center gap-2 p-2 rounded-lg mt-3 ${
-            highContrast ? 'bg-green-900 text-white' : 'bg-green-50 text-green-800'
-          }`}>
+          <div className={`flex items-center gap-2 p-2 rounded-lg mt-3 ${hintClass}`}>
             <Volume2 className="h-4 w-4" />
             <p className="text-xs">{t('voiceActive')}</p>
           </div>
