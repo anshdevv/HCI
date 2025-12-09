@@ -9,6 +9,7 @@ interface LiveTrackingProps {
   onBack: () => void;
   highContrast: boolean;
   voiceEnabled: boolean;
+  initialStatus?: DeliveryStatus;
 }
 
 type DeliveryStatus = 'searching' | 'accepted' | 'arriving' | 'picked_up' | 'in_transit' | 'delivered';
@@ -26,8 +27,9 @@ export function LiveTracking({
   onBack,
   highContrast,
   voiceEnabled,
+  initialStatus = 'searching',
 }: LiveTrackingProps) {
-  const [status, setStatus] = useState<DeliveryStatus>('searching');
+  const [status, setStatus] = useState<DeliveryStatus>(initialStatus);
   const [eta, setEta] = useState(5);
   const [driverPosition, setDriverPosition] = useState({ x: 10, y: 10 });
 
@@ -36,7 +38,7 @@ export function LiveTracking({
     rating: 4.8,
     phone: '+92 300 1234567',
     vehicleNumber: 'ABC-123',
-    photo: '👤',
+    photo: '',
   };
 
   const speak = (text: string) => {
@@ -57,7 +59,10 @@ export function LiveTracking({
       'delivered',
     ];
 
-    let currentIndex = 0;
+    let currentIndex = Math.max(
+      statusTimeline.indexOf(initialStatus),
+      0,
+    );
     const interval = setInterval(() => {
       if (currentIndex < statusTimeline.length - 1) {
         currentIndex++;
@@ -77,7 +82,7 @@ export function LiveTracking({
     }, 5000); // Change status every 5 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [initialStatus, bookingDetails?.type]);
 
   useEffect(() => {
     // Simulate driver movement
@@ -222,10 +227,10 @@ export function LiveTracking({
       {status !== 'searching' && (
         <Card className={`p-4 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
           <div className="flex items-center gap-4">
-            <div className={`h-16 w-16 rounded-full flex items-center justify-center text-3xl ${
-              highContrast ? 'bg-green-900' : 'bg-green-100'
+            <div className={`h-16 w-16 rounded-full flex items-center justify-center ${
+              highContrast ? 'bg-green-900 text-green-400' : 'bg-green-100 text-green-700'
             }`}>
-              {driverInfo.photo}
+              <User className="h-8 w-8" />
             </div>
             
             <div className="flex-1">

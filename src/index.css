@@ -165,6 +165,7 @@
 
   body {
     line-height: inherit;
+  overflow-x: hidden;
   }
 
   hr {
@@ -2487,6 +2488,30 @@
   --sidebar-accent-foreground: oklch(.985 0 0);
   --sidebar-border: oklch(.269 0 0);
   --sidebar-ring: oklch(.439 0 0);
+}
+
+.theme-emerald {
+  --color-green-50: oklch(.982 .018 155.826);
+  --color-green-100: oklch(.962 .044 156.743);
+  --color-green-200: oklch(.925 .084 155.995);
+  --color-green-400: oklch(.792 .209 151.711);
+  --color-green-500: oklch(.723 .219 149.579);
+  --color-green-600: oklch(.627 .194 149.214);
+  --color-green-700: oklch(.527 .154 150.069);
+  --color-green-800: oklch(.448 .119 151.328);
+  --color-green-900: oklch(.393 .095 152.535);
+}
+
+.theme-indigo {
+  --color-green-50: #eef2ff;
+  --color-green-100: #e0e7ff;
+  --color-green-200: #c7d2fe;
+  --color-green-400: #818cf8;
+  --color-green-500: #6366f1;
+  --color-green-600: #4f46e5;
+  --color-green-700: #4338ca;
+  --color-green-800: #3730a3;
+  --color-green-900: #312e81;
 }
 
 html {

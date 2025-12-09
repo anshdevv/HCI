@@ -27,6 +27,7 @@ export interface AppSettings {
   voiceEnabled: boolean;
   language: 'en' | 'ur';
   fontSize: number;
+  colorScheme: 'emerald' | 'indigo';
 }
 
 export interface BookingDetails {
@@ -50,6 +51,7 @@ export default function App() {
     voiceEnabled: false,
     language: 'en',
     fontSize: 16,
+    colorScheme: 'emerald',
   });
   const [showSettings, setShowSettings] = useState(false);
   const [bookingDetails, setBookingDetails] =
@@ -97,7 +99,7 @@ export default function App() {
 
   return (
     <div
-      className={`min-h-screen ${settings.highContrast ? "bg-black text-white" : "bg-white text-gray-900"}`}
+      className={`min-h-screen overflow-x-hidden ${settings.highContrast ? "bg-black text-white" : "bg-white text-gray-900"} theme-${settings.colorScheme}`}
     >
       {/* Header */}
       <header
@@ -157,6 +159,7 @@ export default function App() {
             onBack={handleBack}
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}
+            onStartTracking={handleStartTracking}
           />
         )}
 
@@ -181,6 +184,7 @@ export default function App() {
         {currentScreen === "tracking" && (
           <LiveTracking
             bookingDetails={bookingDetails}
+            initialStatus="accepted"
             onBack={handleBack}
             highContrast={settings.highContrast}
             voiceEnabled={settings.voiceEnabled}

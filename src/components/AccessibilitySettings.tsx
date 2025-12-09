@@ -1,8 +1,7 @@
-import { X, Volume2, Eye, Type, Languages } from 'lucide-react';
+import { X, Volume2, Eye, Type, Languages, Palette, Minus, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Switch } from './ui/switch';
 import { Card } from './ui/card';
-import { Slider } from './ui/slider';
 import { AppSettings } from '../App';
 import { getTranslation } from '../translations';
 
@@ -55,19 +54,18 @@ export function AccessibilitySettings({
     }
   };
 
-  const handleFontSizeChange = (value: number[]) => {
-    const newSettings = { ...settings, fontSize: value[0] };
-    onSettingsChange(newSettings);
-    
-    // Update CSS variable for font size
-    document.documentElement.style.setProperty('--font-size', `${value[0]}px`);
-  };
-
   const getFontSizeLabel = () => {
     if (settings.fontSize <= 14) return t('small');
     if (settings.fontSize <= 18) return t('medium');
     if (settings.fontSize <= 22) return t('large');
     return t('extraLarge');
+  };
+
+  const updateFontSize = (delta: number) => {
+    const nextSize = Math.min(28, Math.max(12, settings.fontSize + delta));
+    const newSettings = { ...settings, fontSize: nextSize };
+    onSettingsChange(newSettings);
+    document.documentElement.style.setProperty('--font-size', `${nextSize}px`);
   };
 
   return (
@@ -143,7 +141,7 @@ export function AccessibilitySettings({
             </div>
           </Card>
 
-          {/* Font Size Slider */}
+          {/* Font Size Controls */}
           <Card className={`p-4 ${settings.highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
             <div className="flex items-start gap-4">
               <div className={`p-3 rounded-lg ${
@@ -165,24 +163,32 @@ export function AccessibilitySettings({
                   {t('fontSizeDesc')}
                 </p>
                 
-                {/* Font Size Slider */}
+                {/* Font Size Buttons */}
                 <div className="space-y-3">
-                  <Slider
-                    value={[settings.fontSize]}
-                    onValueChange={handleFontSizeChange}
-                    min={12}
-                    max={28}
-                    step={2}
-                    className="w-full"
-                  />
-                  
-                  {/* Size Labels */}
-                  <div className="flex justify-between text-xs opacity-70">
-                    <span>12px</span>
-                    <span>20px</span>
-                    <span>28px</span>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => updateFontSize(-2)}
+                      className={settings.highContrast ? 'border-green-400 text-green-400' : ''}
+                      aria-label="Decrease font size"
+                    >
+                      <Minus className="h-4 w-4" />
+                    </Button>
+                    <div className={`flex-1 text-center py-2 rounded-lg ${settings.highContrast ? 'bg-gray-800 text-white' : 'bg-gray-50 text-gray-900'}`}>
+                      {settings.fontSize}px
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => updateFontSize(2)}
+                      className={settings.highContrast ? 'border-green-400 text-green-400' : ''}
+                      aria-label="Increase font size"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
                   </div>
-                  
+
                   {/* Preview Text */}
                   <div className={`p-3 rounded-lg ${
                     settings.highContrast ? 'bg-gray-800' : 'bg-gray-50'
@@ -247,6 +253,43 @@ export function AccessibilitySettings({
           </Card>
 
           {/* Color Blind Info */}
+          <Card className={`p-4 ${settings.highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
+            <div className="flex items-start gap-4">
+              <div className={`p-3 rounded-lg ${
+                settings.highContrast ? 'bg-green-900' : 'bg-green-100'
+              }`}>
+                <Palette className={`h-6 w-6 ${settings.highContrast ? 'text-green-400' : 'text-green-600'}`} />
+              </div>
+              
+              <div className="flex-1">
+                <h3 className="text-lg mb-2">{t('colorScheme')}</h3>
+                <p className="text-sm opacity-70 mb-3">
+                  Choose a color mood that is comfortable for you
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {['emerald', 'indigo'].map((scheme) => (
+                    <button
+                      key={scheme}
+                      onClick={() => onSettingsChange({ ...settings, colorScheme: scheme as any })}
+                      className={`p-3 rounded-lg border transition-all ${
+                        settings.colorScheme === scheme
+                          ? settings.highContrast
+                            ? 'bg-green-900 border-green-400'
+                            : 'bg-green-600 text-white'
+                          : settings.highContrast
+                          ? 'bg-gray-800 border-gray-700'
+                          : 'bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      {scheme === 'emerald' ? 'Emerald' : 'Indigo'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Color Blind Info */}
           <Card className={`p-4 ${settings.highContrast ? 'bg-gray-900 border-green-400' : 'bg-green-50'}`}>
             <div className="flex items-start gap-4">
               <div className={`p-3 rounded-lg ${
@@ -270,7 +313,7 @@ export function AccessibilitySettings({
           <div className={`p-4 rounded-lg ${
             settings.highContrast ? 'bg-green-900 text-white' : 'bg-green-50 text-green-800'
           }`}>
-            <h3 className="mb-2">💡 {t('accessibilityTips')}</h3>
+            <h3 className="mb-2">{t('accessibilityTips')}</h3>
             <ul className="text-sm space-y-1 opacity-90">
               <li>• {t('tip1')}</li>
               <li>• {t('tip2')}</li>

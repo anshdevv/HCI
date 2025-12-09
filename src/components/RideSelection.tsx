@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Bike, Car, Volume2, DollarSign, Clock } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -12,6 +12,7 @@ interface RideSelectionProps {
   onBack: () => void;
   highContrast: boolean;
   voiceEnabled: boolean;
+  onStartTracking: (details: { type: 'ride' | 'delivery'; vehicleType?: string; fare: number; scheduledTime?: Date }) => void;
 }
 
 interface RideOption {
@@ -37,14 +38,17 @@ export function RideSelection({
   onBack,
   highContrast,
   voiceEnabled,
+  onStartTracking,
 }: RideSelectionProps) {
   const [selectedRide, setSelectedRide] = useState<string | null>(null);
   const [customFare, setCustomFare] = useState<number>(0);
   const [isBidding, setIsBidding] = useState(false);
+  const [isFindingRiders, setIsFindingRiders] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduledTime, setScheduledTime] = useState('');
   const [riderBids, setRiderBids] = useState<RiderBid[]>([]);
   const [showBids, setShowBids] = useState(false);
+  const contentRef = useRef<HTMLDivElement | null>(null);
 
   const rideOptions: RideOption[] = [
     {
@@ -103,6 +107,7 @@ export function RideSelection({
 
   const handleSubmitBid = () => {
     speak('Searching for riders willing to accept your offer');
+    setIsFindingRiders(true);
     
     // Simulate rider bids after 2 seconds
     setTimeout(() => {
@@ -129,15 +134,29 @@ export function RideSelection({
           eta: '7 mins',
         },
       ];
-      setRiderBids(mockBids);
+      const sortedBids = [...mockBids].sort(
+        (a, b) => b.rating - a.rating || parseInt(a.eta) - parseInt(b.eta),
+      );
+      setRiderBids(sortedBids);
       setShowBids(true);
       speak(`${mockBids.length} riders are interested. Check their bids.`);
+      setIsFindingRiders(false);
     }, 2000);
   };
 
+  useEffect(() => {
+    if (showBids && contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [showBids]);
+
   const handleAcceptBid = (bid: RiderBid) => {
     speak(`Accepting bid from ${bid.riderName} for ${bid.bidAmount} rupees`);
-    alert(`Ride confirmed with ${bid.riderName} for ₹${bid.bidAmount}`);
+    onStartTracking({
+      type: 'ride',
+      vehicleType: selectedRide || undefined,
+      fare: bid.bidAmount,
+    });
   };
 
   const handleConfirm = () => {
@@ -148,7 +167,12 @@ export function RideSelection({
         alert(`${selected.name} scheduled for ${scheduledTime} at ₹${customFare}`);
       } else {
         speak(`Booking ${selected.name} now. Please wait.`);
-        alert(`Booking ${selected.name} for ₹${customFare}`);
+        onStartTracking({
+          type: 'ride',
+          vehicleType: selected.name,
+          fare: customFare,
+        });
+        handleSubmitBid();
       }
     }
   };
@@ -172,7 +196,7 @@ export function RideSelection({
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div ref={contentRef} className="flex-1 overflow-y-auto p-4 space-y-3">
         {/* Route Summary - Compact */}
         <Card className={`p-3 ${highContrast ? 'bg-gray-900 border-green-400' : 'bg-gray-50'}`}>
           <div className="space-y-1 text-sm">
@@ -186,6 +210,38 @@ export function RideSelection({
             </div>
           </div>
         </Card>
+
+        {/* Available Riders (kept near top) */}
+        {showBids && riderBids.length > 0 && (
+          <Card className={`p-4 space-y-3 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
+            <h3 className="text-lg">Available Riders</h3>
+            {riderBids.map((bid) => (
+              <div
+                key={bid.riderId}
+                className={`p-3 rounded-lg flex items-center justify-between ${
+                  highContrast ? 'bg-gray-800' : 'bg-gray-50'
+                }`}
+              >
+                <div className="flex-1">
+                  <p className="font-medium">{bid.riderName}</p>
+                  <p className="text-sm opacity-70">⭐ {bid.rating} • ETA: {bid.eta}</p>
+                </div>
+                <div className="text-right flex items-center gap-3">
+                  <div>
+                    <p className="text-xl">₹{bid.bidAmount}</p>
+                  </div>
+                  <Button
+                    onClick={() => handleAcceptBid(bid)}
+                    size="sm"
+                    className={highContrast ? 'bg-green-900 border border-green-400' : 'bg-green-600'}
+                  >
+                    Accept
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </Card>
+        )}
 
         {/* Ride Options */}
         <div className="space-y-3">
@@ -283,23 +339,24 @@ export function RideSelection({
 
                 <Button
                   onClick={handleSubmitBid}
+                  disabled={isFindingRiders}
                   className={`w-full h-12 ${
                     highContrast
                       ? 'bg-green-900 hover:bg-green-800 text-white border border-green-400'
                       : 'bg-green-600 hover:bg-green-700 text-white'
                   }`}
                 >
-                  Find Riders at ₹{customFare}
+                  {isFindingRiders ? 'Finding riders...' : `Find Riders at ₹${customFare}`}
                 </Button>
 
                 {customFare < selectedOption.suggestedFare && (
                   <p className="text-xs opacity-70 text-center">
-                    ⚠️ Lower fares may take longer to find a rider
+                    Lower fares may take longer to find a rider
                   </p>
                 )}
                 {customFare > selectedOption.suggestedFare && (
                   <p className="text-xs opacity-70 text-center">
-                    ✨ Higher fares attract riders faster
+                    Higher fares attract riders faster
                   </p>
                 )}
               </div>
@@ -307,42 +364,8 @@ export function RideSelection({
           </Card>
         )}
 
-        {/* Rider Bids */}
-        {showBids && riderBids.length > 0 && (
-          <Card className={`p-4 space-y-3 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
-            <h3 className="text-lg">Available Riders</h3>
-            {riderBids.map((bid) => (
-              <div
-                key={bid.riderId}
-                className={`p-3 rounded-lg flex items-center justify-between ${
-                  highContrast ? 'bg-gray-800' : 'bg-gray-50'
-                }`}
-              >
-                <div className="flex-1">
-                  <p>{bid.riderName}</p>
-                  <p className="text-sm opacity-70">⭐ {bid.rating} • ETA: {bid.eta}</p>
-                </div>
-                <div className="text-right flex items-center gap-3">
-                  <div>
-                    <p className="text-xl">₹{bid.bidAmount}</p>
-                    {bid.bidAmount > customFare && (
-                      <p className="text-xs opacity-70">Counter-offer</p>
-                    )}
-                  </div>
-                  <Button
-                    onClick={() => handleAcceptBid(bid)}
-                    size="sm"
-                    className={highContrast ? 'bg-green-900 border border-green-400' : 'bg-green-600'}
-                  >
-                    Accept
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </Card>
-        )}
-
         {/* Schedule Ride */}
+        {!showBids && (
         <Card className={`p-4 space-y-3 ${highContrast ? 'bg-gray-900 border-green-400' : ''}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -369,6 +392,7 @@ export function RideSelection({
             />
           )}
         </Card>
+        )}
 
         {/* Confirm Button */}
         {!isBidding && (

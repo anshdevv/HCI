@@ -32,6 +32,8 @@ export function HomeScreen({
 }: HomeScreenProps) {
   const [showLocationPicker, setShowLocationPicker] = useState<'pickup' | 'dropoff' | null>(null);
   const [isListening, setIsListening] = useState(false);
+  const [pickupText, setPickupText] = useState('');
+  const [dropoffText, setDropoffText] = useState('');
   
   const t = (key: any) => getTranslation(key, language);
 
@@ -43,7 +45,6 @@ export function HomeScreen({
       lng: -74.006,
       icon: <Home className="h-6 w-6" />,
       label: t('home'),
-      emoji: '🏠'
     },
     { 
       address: language === 'ur' ? 'دفتر - ڈاؤن ٹاؤن آفس' : 'Work - Downtown Office',
@@ -51,7 +52,6 @@ export function HomeScreen({
       lng: -73.9654,
       icon: <Briefcase className="h-6 w-6" />,
       label: t('work'),
-      emoji: '💼'
     },
     { 
       address: language === 'ur' ? 'ہسپتال - سٹی میڈیکل' : 'Hospital - City Medical',
@@ -59,7 +59,6 @@ export function HomeScreen({
       lng: -73.9855,
       icon: <Star className="h-6 w-6" />,
       label: t('hospital'),
-      emoji: '🏥'
     },
     { 
       address: language === 'ur' ? 'بازار - سینٹرل بازار' : 'Market - Central Bazaar',
@@ -67,7 +66,6 @@ export function HomeScreen({
       lng: -73.9955,
       icon: <Star className="h-6 w-6" />,
       label: t('market'),
-      emoji: '🛒'
     },
   ];
 
@@ -159,7 +157,7 @@ export function HomeScreen({
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] flex flex-col" style={{ direction: language === 'ur' ? 'rtl' : 'ltr' }}>
+    <div className="h-[calc(100vh-80px)] flex flex-col overflow-x-hidden" style={{ direction: language === 'ur' ? 'rtl' : 'ltr' }}>
       {/* Map View */}
       <div className="relative flex-1 overflow-hidden">
         <MapView
@@ -196,9 +194,6 @@ export function HomeScreen({
                     {pickupLocation?.address || t('tapToSelect')}
                   </p>
                 </div>
-                {pickupLocation && (
-                  <div className="text-2xl">🚀</div>
-                )}
               </div>
             </button>
 
@@ -226,9 +221,6 @@ export function HomeScreen({
                     {dropoffLocation?.address || t('tapToSelect')}
                   </p>
                 </div>
-                {dropoffLocation && (
-                  <div className="text-2xl">🎯</div>
-                )}
               </div>
             </button>
           </div>
@@ -238,19 +230,57 @@ export function HomeScreen({
         {showLocationPicker && (
           <div className={`absolute inset-0 z-20 ${
             highContrast ? 'bg-black' : 'bg-white'
-          } overflow-y-auto touch-pan-y overscroll-contain`}>
+          } overflow-y-auto touch-pan-y overscroll-contain max-w-full`}>
             <div className="p-4 space-y-3">
               {/* Header */}
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg">
-                  {showLocationPicker === 'pickup' ? `🚀 ${t('pickupLocation')}` : `🎯 ${t('dropoffLocation')}`}
+                  {showLocationPicker === 'pickup' ? t('pickupLocation') : t('dropoffLocation')}
                 </h3>
                 <Button
                   variant="ghost"
                   onClick={() => setShowLocationPicker(null)}
                   className={highContrast ? 'text-green-400' : ''}
                 >
-                  ✕ {t('close')}
+                  Close
+                </Button>
+              </div>
+
+              {/* Manual entry */}
+              <div className="space-y-2">
+                <Input
+                  placeholder={showLocationPicker === 'pickup' ? 'Enter pickup address' : 'Enter dropoff address'}
+                  value={showLocationPicker === 'pickup' ? pickupText : dropoffText}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (showLocationPicker === 'pickup') {
+                      setPickupText(value);
+                    } else {
+                      setDropoffText(value);
+                    }
+                  }}
+                  className={highContrast ? 'bg-gray-800 border-green-400 text-white' : ''}
+                />
+                <Button
+                  onClick={() => {
+                    const value = showLocationPicker === 'pickup' ? pickupText : dropoffText;
+                    if (!value.trim()) return;
+                    const location: Location = {
+                      address: value.trim(),
+                      lat: 40.7128 + Math.random() * 0.05,
+                      lng: -74.006 + Math.random() * 0.05,
+                    };
+                    if (showLocationPicker === 'pickup') {
+                      onPickupChange(location);
+                    } else {
+                      onDropoffChange(location);
+                    }
+                    speak(`${showLocationPicker === 'pickup' ? t('pickup') : t('dropoff')} ${t('setTo')} ${value}`);
+                    setShowLocationPicker(null);
+                  }}
+                  className={highContrast ? 'bg-green-900 border border-green-400' : ''}
+                >
+                  Save Location
                 </Button>
               </div>
 
@@ -298,7 +328,7 @@ export function HomeScreen({
 
               {/* Saved Locations - Visual Grid */}
               <div>
-                <h4 className="text-sm opacity-70 mb-2">📌 {t('savedPlaces')}</h4>
+                <h4 className="text-sm opacity-70 mb-2">{t('savedPlaces')}</h4>
                 <div className="grid grid-cols-2 gap-3">
                   {savedLocations.map((location) => (
                     <button
@@ -311,7 +341,9 @@ export function HomeScreen({
                       }`}
                     >
                       <div className="flex flex-col items-center gap-2">
-                        <div className="text-4xl">{location.emoji}</div>
+                        <div className={`h-12 w-12 rounded-full flex items-center justify-center ${highContrast ? 'bg-green-900 text-green-400' : 'bg-green-100 text-green-700'}`}>
+                          {location.icon}
+                        </div>
                         <span className="text-sm text-center">{location.label}</span>
                       </div>
                     </button>
